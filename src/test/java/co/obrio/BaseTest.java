@@ -1,85 +1,93 @@
 package co.obrio;
 
-import io.appium.java_client.android.AndroidDriver;
-import io.appium.java_client.android.options.UiAutomator2Options;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
+import base.data.Gender;
+import base.data.Interests;
+import base.data.OptionsValue;
+import base.data.RelationshipStatus;
+import org.testng.annotations.Test;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.net.URL;
-import java.util.Properties;
+public class BaseTest extends BaseFixture {
 
-public class BaseTest {
+    private final String location = "Kyiv";
+    private final String name = "Anastasiia";
 
-    private static Properties properties = null;
-    private static UiAutomator2Options capabilities = null;
+    @Test(description = "Onboarding test")
+    public void onboardingTest() {
+        welcomeScreen.assertIsOpened();
+        welcomeScreen.tapOnGetStartedButton();
 
-    protected AndroidDriver driver;
+        onboardingScreen.questionFragment.assertIsOpened();
+        onboardingScreen.assertNextButtonIsDisabled();
+        onboardingScreen.questionFragment.tapOnAnswerOption(OptionsValue.FUTURE);
+        onboardingScreen.questionFragment.assertAnswerOptionCheckboxIsSelected(OptionsValue.FUTURE);
+        onboardingScreen.tapOnNextButton();
 
-    @BeforeClass
-    public void setUp() {
-        setProperties();
-        setCapability();
-        setDriver();
+        onboardingScreen.successGoalsFragment.assertIsOpened();
+        onboardingScreen.tapOnNextButton();
+
+        onboardingScreen.birthChartFragment.assertIsOpened();
+        onboardingScreen.tapOnNextButton();
+
+        onboardingScreen.dateOfBirthFragment.assertIsOpened();
+        onboardingScreen.checkNumberPickers();
+        onboardingScreen.tapOnNextButton();
+
+        onboardingScreen.timeOfBirthFragment.assertIsOpened();
+        onboardingScreen.checkNumberPickers();
+        onboardingScreen.tapOnNextButton();
+
+        onboardingScreen.placeOfBirthFragment.assertIsOpened();
+        onboardingScreen.placeOfBirthFragment.fillPlaceOfBirthField(location);
+        onboardingScreen.placeOfBirthFragment.clickOnLocation(location);
+
+        onboardingScreen.palmReadingFragment.assertIsOpened();
+        onboardingScreen.tapOnSkipButton();
+
+        onboardingScreen.genderFragment.assertIsOpened();
+        onboardingScreen.genderFragment.tapOnGender(Gender.FEMALE);
+
+        onboardingScreen.nameFragment.assertIsOpened();
+        onboardingScreen.assertNextButtonIsDisabled();
+        onboardingScreen.nameFragment.fillNameInput(name);
+        onboardingScreen.tapOnNextButton();
+
+        onboardingScreen.relationshipFragment.assertIsOpened();
+        onboardingScreen.relationshipFragment.tapOnStatus(RelationshipStatus.ENGAGED);
+
+        onboardingScreen.interestsFragment.assertIsOpened();
+        onboardingScreen.assertNextButtonIsDisabled();
+        onboardingScreen.interestsFragment.tapOnInterests(Interests.CAREER);
+        onboardingScreen.interestsFragment.tapOnInterests(Interests.LOVE);
+        onboardingScreen.interestsFragment.assertInterestIsSelected(Interests.CAREER);
+        onboardingScreen.interestsFragment.assertInterestIsSelected(Interests.LOVE);
+        onboardingScreen.tapOnNextButton();
+
+        onboardingScreen.motivationFragment.assertStatementIsOpened();
+        onboardingScreen.motivationFragment.tapYesButton();
+        onboardingScreen.motivationFragment.assertMotivationIsOpened();
+        onboardingScreen.tapOnNextButton();
+
+        onboardingScreen.remindersFragment.assertIsOpened();
+        onboardingScreen.checkNumberPickers();
+        onboardingScreen.tapOnSkipButton();
+
+        onboardingScreen.questionFragment.assertIsOpened();
+        onboardingScreen.assertNextButtonIsDisabled();
+        onboardingScreen.questionFragment.tapOnAnswerOption(OptionsValue.GOOGLE_PLAY);
+        onboardingScreen.questionFragment.assertAnswerOptionCheckboxIsSelected(OptionsValue.GOOGLE_PLAY);
+        onboardingScreen.tapOnNextButton();
+
+        onboardingScreen.graphicFragment.assertIsOpened();
+        onboardingScreen.tapOnNextButton();
+
+        onboardingScreen.reviewsFragment.assertIsOpened();
+        onboardingScreen.tapOnNextButton();
+
+        onboardingScreen.signUpFragment.assertIsOpened();
+        onboardingScreen.signUpFragment.tapOnContinueWithEmailButton();
+
+        signUpScreen.assertIsOpened();
     }
 
-    @AfterClass
-    public void tearDown() {
-        if(driver != null) {
-            driver.quit();
-        }
-    }
-
-    private void setProperties() {
-        if (properties == null) {
-            try {
-                properties = new Properties();
-                FileInputStream fis = new FileInputStream(getPathWithCorrectSeparator("src/test/resources/config.properties"));
-                properties.load(fis);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
-
-    private void setDriver() {
-        try {
-            driver = new AndroidDriver(
-                    new URL(properties.getProperty("appium.server.url")),
-                    capabilities
-            );
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private void setCapability() {
-        if (capabilities == null) {
-            capabilities = new UiAutomator2Options();
-            capabilities.setCapability("platformName", properties.getProperty("platform.name"));
-            capabilities.setCapability("platformVersion", properties.getProperty("platform.version"));
-            capabilities.setCapability("deviceName", properties.getProperty("device.name"));
-            capabilities.setCapability("automationName", properties.getProperty("automationName"));
-            capabilities.setCapability("app", getAppAbsolutePath());
-        }
-    }
-
-    private String getAppAbsolutePath() {
-        String appName = properties.getProperty("app.name");
-        URL resource = getClass().getClassLoader().getResource(appName);
-        if (resource == null) {
-            throw new RuntimeException("App not found " + appName + " in resource directory");
-        }
-        try {
-            return new File(resource.toURI()).getAbsolutePath();
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Something went wrong for app: " + appName);
-        }
-    }
-
-    private String getPathWithCorrectSeparator(String path) {
-        return path.replaceAll("/", File.separator);
-    }
 }
+
